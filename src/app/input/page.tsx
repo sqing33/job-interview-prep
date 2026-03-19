@@ -1,5 +1,5 @@
 import { getAnalysisById } from "@/lib/db";
-import { MODEL_PRESETS } from "@/lib/constants";
+import { getAppSettings } from "@/lib/settings";
 
 import { InputForm } from "./InputForm";
 
@@ -11,18 +11,17 @@ export default async function InputPage({
   searchParams: Promise<{ from?: string }>;
 }) {
   const { from } = await searchParams;
+  const settings = getAppSettings();
 
-  let initialModel = MODEL_PRESETS[0];
-  let initialQuestionCount: 30 | 40 | 50 = 40;
+  let initialModel = settings.defaultModel;
   let initialJobText = "";
-  let initialResumeText = "";
+  let initialResumeText = settings.resumeText;
 
   if (from) {
     const analysis = getAnalysisById(from);
 
     if (analysis) {
       initialModel = analysis.model;
-      initialQuestionCount = analysis.questionCount as 30 | 40 | 50;
       initialJobText = analysis.jobText;
       initialResumeText = analysis.resumeText;
     }
@@ -31,7 +30,6 @@ export default async function InputPage({
   return (
     <InputForm
       initialModel={initialModel}
-      initialQuestionCount={initialQuestionCount}
       initialJobText={initialJobText}
       initialResumeText={initialResumeText}
     />

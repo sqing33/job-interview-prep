@@ -22,13 +22,13 @@ export function DocumentPane({
   warnings: string[];
 }) {
   return (
-    <section className="flex min-h-0 flex-col p-5">
-      <div className="mb-4 flex shrink-0 items-center justify-between gap-4">
-        <h3 className="text-lg font-semibold text-foreground">{label}</h3>
+    <section className="flex h-full min-h-0 flex-col">
+      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border/50 px-4 py-3 sm:py-2.5">
+        <h3 className="text-[15px] font-semibold text-foreground sm:text-sm">{label}</h3>
 
-        <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border bg-white/72 px-3.5 py-1.5 text-sm font-medium text-foreground transition hover:bg-white">
-          {isParsing ? <LoaderCircle className="size-4 animate-spin" /> : <Upload className="size-4" />}
-          上传文件
+        <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-border bg-white/72 px-3 py-1.5 text-xs font-medium text-foreground transition hover:bg-white sm:py-1">
+          {isParsing ? <LoaderCircle className="size-3.5 animate-spin" /> : <Upload className="size-3.5" />}
+          上传
           <input
             accept=".pdf,.docx,.txt,.md,.markdown"
             className="hidden"
@@ -43,33 +43,23 @@ export function DocumentPane({
         </label>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-hidden">
+      <div className="flex-1 min-h-0">
         <Label className="sr-only" htmlFor={`${inputId}-textarea`}>
           {label} 文本
         </Label>
         <textarea
           id={`${inputId}-textarea`}
-          className="h-full w-full min-h-0 resize-none border border-border bg-white/72 px-4 py-4 text-sm leading-7 text-foreground outline-none transition placeholder:text-foreground-soft/70 focus:border-border-strong focus:ring-4 focus:ring-[var(--ring)]"
+          className="h-full w-full resize-none bg-transparent px-4 py-3 text-[15px] leading-7 text-foreground outline-none placeholder:text-foreground-soft/70 sm:text-sm sm:leading-6"
           placeholder={`粘贴${label}内容，或上传文件。`}
           value={value}
           onChange={(event) => onValueChange(event.target.value)}
         />
       </div>
 
-      <div className="mt-3 shrink-0 text-xs text-foreground-soft">
-        {value.length} 字符
+      <div className="flex shrink-0 items-center justify-between border-t border-border/50 px-4 py-2 text-xs text-foreground-soft sm:py-1.5">
+        <span>{value.length} 字符</span>
+        {warnings.length ? <span className="text-accent-strong">有解析提示</span> : null}
       </div>
-
-      {warnings.length ? (
-        <div className="mt-4 shrink-0 rounded-[1rem] border border-border bg-white/62 p-4">
-          <p className="text-sm font-semibold text-foreground">解析提示</p>
-          <ul className="mt-2 space-y-2 text-sm leading-6 text-foreground-soft">
-            {warnings.map((warning) => (
-              <li key={warning}>- {warning}</li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
     </section>
   );
 }

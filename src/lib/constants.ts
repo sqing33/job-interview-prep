@@ -1,6 +1,6 @@
 import type { CategoryKey } from "@/lib/types";
 
-export const APP_NAME = "Interview Dossier";
+export const APP_NAME = "Job Interview Dossier";
 export const DEFAULT_MODEL = "gpt-4.1-mini";
 export const MODEL_PRESETS = ["gpt-4.1-mini", "gpt-4.1", "gpt-4o-mini", "gpt-4o", "o4-mini"];
 export const QUESTION_COUNT_OPTIONS = [30, 40, 50] as const;

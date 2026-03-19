@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LoaderCircle, Settings2 } from "lucide-react";
 
-import { Button, Input, Label, Badge } from "@/components/ui";
+import { Button, Input, Label } from "@/components/ui";
 import { APP_NAME } from "@/lib/constants";
 import type { AppSettings } from "@/lib/types";
 
@@ -61,7 +61,7 @@ export function Navbar({ initialSettings }: { initialSettings: AppSettings }) {
 
   return (
     <>
-      <nav className="sticky top-0 z-40 shrink-0 border-b border-border bg-surface-strong/80 backdrop-blur-xl">
+      <nav className="shrink-0 border-b border-border bg-surface-strong/80 backdrop-blur-xl">
         <div className="mx-auto flex h-14 max-w-[1700px] items-center gap-6 px-5 lg:px-7">
           <Link className="text-sm font-semibold tracking-tight text-foreground" href="/history">
             {APP_NAME}
@@ -76,7 +76,7 @@ export function Navbar({ initialSettings }: { initialSettings: AppSettings }) {
                   key={item.href}
                   className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition ${
                     isActive
-                      ? "bg-foreground text-white"
+                      ? "bg-foreground !text-white"
                       : "text-foreground-soft hover:bg-white/60 hover:text-foreground"
                   }`}
                   href={item.href}
@@ -88,9 +88,6 @@ export function Navbar({ initialSettings }: { initialSettings: AppSettings }) {
           </div>
 
           <div className="ml-auto flex items-center gap-2">
-            <Badge tone={settings.apiKey ? "teal" : "default"}>
-              {settings.apiKey ? "API Key 已保存" : "未配置"}
-            </Badge>
             <button
               aria-label="API 设置"
               className="rounded-full p-2 text-foreground-soft transition hover:bg-white/60 hover:text-foreground"
@@ -133,6 +130,19 @@ export function Navbar({ initialSettings }: { initialSettings: AppSettings }) {
                   value={settingsDraft.apiKey}
                   onChange={(event) =>
                     setSettingsDraft((prev) => ({ ...prev, apiKey: event.target.value }))
+                  }
+                />
+              </div>
+
+              <div className="space-y-3">
+                <Label htmlFor="navbar-default-model">默认模型</Label>
+                <Input
+                  id="navbar-default-model"
+                  autoComplete="off"
+                  placeholder="gpt-5.4"
+                  value={settingsDraft.defaultModel}
+                  onChange={(event) =>
+                    setSettingsDraft((prev) => ({ ...prev, defaultModel: event.target.value }))
                   }
                 />
               </div>

@@ -5,19 +5,23 @@ import path from "node:path";
 
 import { z } from "zod";
 
-import { SETTINGS_FILE_NAME } from "@/lib/constants";
+import { DEFAULT_MODEL, SETTINGS_FILE_NAME } from "@/lib/constants";
 import { AppError } from "@/lib/errors";
 import type { AppSettings } from "@/lib/types";
 
 const settingsSchema = z.object({
   apiKey: z.string().default(""),
   apiBaseUrl: z.string().default(""),
+  defaultModel: z.string().default(DEFAULT_MODEL),
+  resumeText: z.string().default(""),
   updatedAt: z.number().nullable().default(null),
 });
 
 const saveSettingsSchema = z.object({
-  apiKey: z.string().trim().default(""),
-  apiBaseUrl: z.string().trim().default(""),
+  apiKey: z.string().trim().optional(),
+  apiBaseUrl: z.string().trim().optional(),
+  defaultModel: z.string().trim().min(1, "默认模型不能为空。").optional(),
+  resumeText: z.string().optional(),
 });
 
 function getSettingsPath() {
@@ -32,6 +36,8 @@ export function getDefaultAppSettings(): AppSettings {
   return {
     apiKey: "",
     apiBaseUrl: "",
+    defaultModel: DEFAULT_MODEL,
+    resumeText: "",
     updatedAt: null,
   };
 }
@@ -76,9 +82,13 @@ export function getAppSettings(): AppSettings {
 
 export function saveAppSettings(input: unknown): AppSettings {
   const parsed = saveSettingsSchema.parse(input);
+  const current = getAppSettings();
   const nextSettings: AppSettings = {
-    apiKey: parsed.apiKey,
-    apiBaseUrl: normalizeApiBaseUrl(parsed.apiBaseUrl),
+    apiKey: parsed.apiKey ?? current.apiKey,
+    apiBaseUrl:
+      parsed.apiBaseUrl === undefined ? current.apiBaseUrl : normalizeApiBaseUrl(parsed.apiBaseUrl),
+    defaultModel: parsed.defaultModel ?? current.defaultModel,
+    resumeText: parsed.resumeText ?? current.resumeText,
     updatedAt: Date.now(),
   };
 

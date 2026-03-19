@@ -41,14 +41,14 @@ export function DetailActions({ analysisId }: { analysisId: string }) {
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap gap-3">
-        <Button asChild intent="subtle">
+      <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:gap-3">
+        <Button asChild intent="subtle" className="w-full sm:w-auto">
           <Link href="/history">返回档案列表</Link>
         </Button>
-        <Button asChild intent="subtle">
+        <Button asChild intent="subtle" className="w-full sm:w-auto">
           <Link href={`/input?from=${analysisId}`}>重新使用这些材料</Link>
         </Button>
-        <Button intent="danger" disabled={isPending} onClick={handleDelete}>
+        <Button intent="danger" className="w-full sm:w-auto" disabled={isPending} onClick={handleDelete}>
           删除记录
         </Button>
       </div>

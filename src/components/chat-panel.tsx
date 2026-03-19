@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { LoaderCircle, Paperclip, Sparkles } from "lucide-react";
 
 import { Button, Input } from "@/components/ui";
-import { MODEL_PRESETS, QUESTION_COUNT_OPTIONS } from "@/lib/constants";
 
 interface ChatMessage {
   id: string;
@@ -23,8 +22,6 @@ export function ChatPanel({
   jobText,
   model,
   onModelChange,
-  questionCount,
-  onQuestionCountChange,
   resumeText,
   isGenerating,
   onGenerate,
@@ -33,8 +30,6 @@ export function ChatPanel({
   jobText: string;
   model: string;
   onModelChange: (value: string) => void;
-  questionCount: 30 | 40 | 50;
-  onQuestionCountChange: (value: 30 | 40 | 50) => void;
   resumeText: string;
   isGenerating: boolean;
   onGenerate: () => void;
@@ -69,7 +64,7 @@ export function ChatPanel({
       const response = await fetch("/api/analyses/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ model, questionCount, jobText, resumeText }),
+        body: JSON.stringify({ model, questionCount: 50, jobText, resumeText }),
       });
 
       if (!response.ok || !response.body) {
@@ -140,127 +135,103 @@ export function ChatPanel({
   }
 
   return (
-    <div className="flex min-h-0 flex-col h-full">
-      {/* Messages area */}
-      <div className="flex-1 min-h-0 overflow-y-auto p-5 space-y-4">
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="min-h-[10rem] flex-1 overflow-y-auto">
         {!messages.length ? (
-          <div className="flex h-full items-center justify-center text-sm text-foreground-soft">
-            在右侧粘贴简历，然后点击下方按钮生成。
+          <div className="flex h-full items-center justify-center px-6 text-center text-sm leading-6 text-foreground-soft">
+            先输入招聘信息和简历，再开始生成面试分析。
           </div>
-        ) : null}
-
-        {messages.map((msg) => {
-          if (msg.type === "job_sent") {
-            return (
-              <div key={msg.id} className="flex justify-end">
-                <div className="max-w-[80%] rounded-2xl rounded-br-md bg-foreground px-4 py-3 text-sm text-white">
-                  <p className="text-xs font-medium text-white/60 mb-1">已发送招聘信息</p>
-                  <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                </div>
-              </div>
-            );
-          }
-
-          if (msg.type === "file_sent") {
-            return (
-              <div key={msg.id} className="flex justify-end">
-                <div className="max-w-[80%] rounded-2xl rounded-br-md bg-foreground/10 px-4 py-2.5 text-sm text-foreground">
-                  <div className="flex items-center gap-2">
-                    <Paperclip className="size-4 text-foreground-soft" />
-                    <span>{msg.fileName}</span>
+        ) : (
+          <div className="space-y-4 p-4 sm:p-5">
+            {messages.map((msg) => {
+              if (msg.type === "job_sent") {
+                return (
+                  <div key={msg.id} className="flex justify-end">
+                    <div className="max-w-[92%] rounded-2xl rounded-br-md bg-foreground px-4 py-3 text-sm text-white sm:max-w-[80%]">
+                      <p className="mb-1 text-xs font-medium text-white/60">已发送招聘信息</p>
+                      <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                    </div>
                   </div>
-                </div>
-              </div>
-            );
-          }
+                );
+              }
 
-          if (msg.type === "thinking") {
-            return (
-              <div key={msg.id} className="flex justify-start">
-                <div className="max-w-[90%] rounded-2xl rounded-bl-md bg-white/80 border border-border px-4 py-3 text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-                  {msg.content}
-                </div>
-              </div>
-            );
-          }
+              if (msg.type === "file_sent") {
+                return (
+                  <div key={msg.id} className="flex justify-end">
+                    <div className="max-w-[92%] rounded-2xl rounded-br-md bg-foreground/10 px-4 py-2.5 text-sm text-foreground sm:max-w-[80%]">
+                      <div className="flex items-center gap-2">
+                        <Paperclip className="size-4 text-foreground-soft" />
+                        <span>{msg.fileName}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
 
-          if (msg.type === "status") {
-            return (
-              <div key={msg.id} className="flex justify-start">
-                <div className="rounded-full bg-accent/10 px-4 py-2 text-sm text-accent-strong">
-                  {msg.content}
-                </div>
-              </div>
-            );
-          }
+              if (msg.type === "thinking") {
+                return (
+                  <div key={msg.id} className="flex justify-start">
+                    <div className="max-w-[96%] rounded-2xl rounded-bl-md border border-border bg-white/80 px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap text-foreground sm:max-w-[90%]">
+                      {msg.content}
+                    </div>
+                  </div>
+                );
+              }
 
-          if (msg.type === "done") {
-            return (
-              <div key={msg.id} className="flex justify-start">
-                <div className="rounded-2xl bg-teal/10 border border-teal/20 px-4 py-3 text-sm text-teal">
-                  <p className="font-semibold">✅ {msg.content}</p>
-                  <a
-                    className="mt-2 inline-block text-xs font-medium underline hover:no-underline"
-                    href={`/analyses/${msg.analysisId}`}
-                  >
-                    查看完整结果 →
-                  </a>
-                </div>
-              </div>
-            );
-          }
+              if (msg.type === "status") {
+                return (
+                  <div key={msg.id} className="flex justify-start">
+                    <div className="rounded-full bg-accent/10 px-4 py-2 text-sm text-accent-strong">
+                      {msg.content}
+                    </div>
+                  </div>
+                );
+              }
 
-          if (msg.type === "error") {
-            return (
-              <div key={msg.id} className="flex justify-start">
-                <div className="rounded-2xl bg-danger/10 border border-danger/20 px-4 py-3 text-sm text-danger">
-                  {msg.content}
-                </div>
-              </div>
-            );
-          }
+              if (msg.type === "done") {
+                return (
+                  <div key={msg.id} className="flex justify-start">
+                    <div className="rounded-2xl bg-teal/10 border border-teal/20 px-4 py-3 text-sm text-teal">
+                      <p className="font-semibold">✅ {msg.content}</p>
+                      <a
+                        className="mt-2 inline-block text-xs font-medium underline hover:no-underline"
+                        href={`/analyses/${msg.analysisId}`}
+                      >
+                        查看完整结果 →
+                      </a>
+                    </div>
+                  </div>
+                );
+              }
 
-          return null;
-        })}
+              if (msg.type === "error") {
+                return (
+                  <div key={msg.id} className="flex justify-start">
+                    <div className="rounded-2xl bg-danger/10 border border-danger/20 px-4 py-3 text-sm text-danger">
+                      {msg.content}
+                    </div>
+                  </div>
+                );
+              }
 
-        <div ref={messagesEndRef} />
+              return null;
+            })}
+            <div ref={messagesEndRef} />
+          </div>
+        )}
       </div>
 
-      {/* Bottom controls */}
-      <div className="shrink-0 border-t border-border bg-surface-strong/80 backdrop-blur-xl px-5 py-3">
-        <div className="flex items-center gap-3">
+      <div className="shrink-0 border-t border-border bg-surface-strong/80 px-4 py-3 backdrop-blur-xl sm:px-5">
+        <div className="flex items-center gap-2.5 sm:gap-3">
           <Input
-            list="chat-model-presets"
-            placeholder="模型"
+            placeholder="输入模型，例如 gpt-5.4"
             value={model}
             onChange={(event) => onModelChange(event.target.value)}
-            className="w-40 h-9 rounded-xl text-xs"
+            className="h-9 min-w-0 flex-1 rounded-xl text-xs sm:text-sm"
           />
-          <datalist id="chat-model-presets">
-            {MODEL_PRESETS.map((preset) => (
-              <option key={preset} value={preset} />
-            ))}
-          </datalist>
-
-          <div className="flex items-center gap-1.5">
-            {QUESTION_COUNT_OPTIONS.map((option) => (
-              <button
-                key={option}
-                className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
-                  questionCount === option
-                    ? "border-transparent bg-foreground text-white"
-                    : "border-border bg-white/68 text-foreground-soft hover:bg-white"
-                }`}
-                onClick={() => onQuestionCountChange(option)}
-                type="button"
-              >
-                {option}
-              </button>
-            ))}
-          </div>
 
           <Button
-            className="ml-auto h-9 rounded-xl"
+            className="h-9 shrink-0 rounded-xl px-4 sm:px-5"
             disabled={generating || !jobText.trim() || !resumeText.trim()}
             onClick={handleGenerate}
             size="sm"

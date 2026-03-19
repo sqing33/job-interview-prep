@@ -56,6 +56,7 @@ const questionBankSchema = z.object({
           z.object({
             question: z.string().min(12),
             answerMarkdown: z.string().min(28),
+            exampleAnswer: z.string().min(40),
           }),
         ),
       }),
@@ -69,7 +70,7 @@ type RawQuestionBank = z.infer<typeof questionBankSchema>;
 function getOpenAIClient(apiKey: string, baseUrl?: string) {
   return new OpenAI({
     apiKey,
-    baseURL: baseUrl || process.env.OPENAI_BASE_URL || undefined,
+    baseURL: baseUrl || undefined,
   });
 }
 
@@ -113,10 +114,10 @@ function buildQuestionPrompt(
     `必须总共输出 ${questionCount} 道题，分类配额固定为：${buildQuestionDistribution(questionCount)}。`,
     "要求：",
     "1. 问题要像真实面试官会问的表述，不要写成学习纲要。",
-    "2. 参考答案用 Markdown 分点，控制在 2-4 个要点，强调答题思路、可讲的证据和表达方式。",
-    "3. 如果用户材料中缺少某个具体经历，答案里明确提醒“请替换为你的真实经历”，不要虚构细节。",
+    "2. 参考答案用 Markdown 分点，控制在 2-4 个要点，强调答题思路、可讲的证据和表达方式。每道题额外提供一段 exampleAnswer（回答示例），模拟候选人的真实口述回答，控制在 150-250 字。",
+    "3. 如果用户材料中缺少某个具体经历，答案里明确提醒\"请替换为你的真实经历\"，不要虚构细节。",
     "4. 技术题聚焦技能栈、架构、排障、性能、工程化；项目题聚焦项目经历和取舍；行为题聚焦沟通协作与复盘；岗位匹配题聚焦 JD 与简历的对应度。",
-    "5. 输出必须严格满足每个分类的题量，且只返回结构化结果。",
+    `5. 每个分类的 items 数组必须恰好包含对应配额数量的题目，一题都不能少，也不要超出配额。`,
     "",
     "## 结构化岗位画像",
     JSON.stringify(profile, null, 2),
@@ -125,9 +126,10 @@ function buildQuestionPrompt(
   ].join("\n");
 }
 
-function normalizeQuestionBank(raw: RawQuestionBank, questionCount: 30 | 40 | 50): AnalysisResult {
+function normalizeQuestionBank(raw: RawQuestionBank, questionCount: 30 | 40 | 50): { result: AnalysisResult; shortfall: string[] } {
   const quotas = QUESTION_QUOTAS[questionCount];
   const categoriesByKey = new Map<CategoryKey, RawQuestionBank["categories"][number]>();
+  const shortfall: string[] = [];
 
   for (const category of raw.categories) {
     categoriesByKey.set(category.key, category);
@@ -141,13 +143,14 @@ function normalizeQuestionBank(raw: RawQuestionBank, questionCount: 30 | 40 | 50
     }
 
     if (category.items.length < quotas[key]) {
-      throw new AppError(502, "INSUFFICIENT_QUESTIONS", `${CATEGORY_LABELS[key]} 数量不足，请重试。`);
+      shortfall.push(`${CATEGORY_LABELS[key]} 仅返回 ${category.items.length} 题（配额 ${quotas[key]} 题），已使用现有结果。`);
     }
 
     const items = category.items.slice(0, quotas[key]).map((item, index) => ({
       id: `${key}-${index + 1}`,
       question: normalizeMultilineText(item.question).replace(/\n+/g, " "),
       answerMarkdown: normalizeMultilineText(item.answerMarkdown),
+      exampleAnswer: normalizeMultilineText(item.exampleAnswer),
     }));
 
     return {
@@ -158,9 +161,12 @@ function normalizeQuestionBank(raw: RawQuestionBank, questionCount: 30 | 40 | 50
   });
 
   return {
-    company: raw.company?.trim() || null,
-    role: raw.role?.trim() || null,
-    categories: normalizedCategories,
+    result: {
+      company: raw.company?.trim() || null,
+      role: raw.role?.trim() || null,
+      categories: normalizedCategories,
+    },
+    shortfall,
   };
 }
 
@@ -236,11 +242,12 @@ export async function generateInterviewAnalysis(input: {
     throw new AppError(502, "EMPTY_QUESTION_BANK", "AI 没有返回可解析的题库结果。");
   }
 
-  const result = normalizeQuestionBank(rawQuestionBank, input.questionCount);
+  const { result, shortfall } = normalizeQuestionBank(rawQuestionBank, input.questionCount);
+  const allWarnings = [...buildWarnings(profile, result), ...shortfall];
 
   return {
     result,
-    warnings: buildWarnings(profile, result),
+    warnings: allWarnings,
   };
 }
 
@@ -333,8 +340,8 @@ export async function* generateInterviewAnalysisStream(input: {
     throw new AppError(502, "EMPTY_QUESTION_BANK", "AI 没有返回可解析的题库结果。");
   }
 
-  const result = normalizeQuestionBank(rawQuestionBank, input.questionCount);
-  const warnings = buildWarnings(profile, result);
+  const { result, shortfall } = normalizeQuestionBank(rawQuestionBank, input.questionCount);
+  const warnings = [...buildWarnings(profile, result), ...shortfall];
 
   yield {
     type: "done",

@@ -19,8 +19,8 @@ const ibmPlexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Interview Dossier",
-    template: "%s | Interview Dossier",
+    default: "Job Interview Dossier",
+    template: "%s | Job Interview Dossier",
   },
   description: "上传招聘信息与简历，生成面向目标岗位的面试题与参考答案。",
 };
@@ -37,9 +37,9 @@ export default function RootLayout({
       lang="zh-CN"
       className={`${spaceGrotesk.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-screen flex-col">
+      <body className="h-screen flex flex-col overflow-hidden">
         <Navbar initialSettings={settings} />
-        <main className="mx-auto w-full max-w-[1700px] flex-1 flex flex-col">
+        <main className="w-full flex-1 flex flex-col min-h-0">
           {children}
         </main>
       </body>

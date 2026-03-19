@@ -6,6 +6,7 @@ export interface AnalysisQuestion {
   id: string;
   question: string;
   answerMarkdown: string;
+  exampleAnswer: string;
 }
 
 export interface AnalysisCategory {
@@ -59,5 +60,7 @@ export interface CreateAnalysisResponse {
 export interface AppSettings {
   apiKey: string;
   apiBaseUrl: string;
+  defaultModel: string;
+  resumeText: string;
   updatedAt: number | null;
 }
