@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Interview Dossier
 
-## Getting Started
+一个本地优先的面试学习 Web 应用。用户提供招聘信息和个人简历后，应用会通过 OpenAI SDK 分析岗位与经历，生成按类别分组的 30/40/50 道面试题和参考答案，并把结果保存到本地 SQLite 历史记录中。
 
-First, run the development server:
+## 功能
+
+- 粘贴或上传 `PDF / DOCX / TXT / Markdown` 形式的招聘信息与简历
+- 服务端解析文本，用户可在提交前手工修正
+- 前端会话级输入 OpenAI API Key 和自定义 API URL，不写入数据库或浏览器持久化存储
+- 使用 OpenAI Responses API + 结构化输出生成题库
+- 题库按 `技术题 / 项目题 / 行为题 / 岗位匹配题` 分组
+- 历史记录保存到本地 SQLite，可回看、复用材料、删除
+
+## 本地运行
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+cp .env.example .env.local
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+打开 `http://localhost:3000`。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 环境变量
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`.env.local` 支持以下变量：
 
-## Learn More
+```bash
+OPENAI_BASE_URL=
+APP_DATABASE_PATH=./data/interview-prep.sqlite
+```
 
-To learn more about Next.js, take a look at the following resources:
+- `OPENAI_BASE_URL`：可选，服务端默认 API URL；页面里填写的自定义 API URL 会优先覆盖它
+- `APP_DATABASE_PATH`：可选，自定义本地 SQLite 文件路径
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 校验命令
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+pnpm lint
+pnpm typecheck
+pnpm test:run
+pnpm build
+```
 
-## Deploy on Vercel
+## 说明
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- 首次安装后如果 `better-sqlite3` 缺少原生绑定，可在其包目录重新执行一次安装脚本。
+- PDF 仅保证支持“可提取文本”的文档；扫描版 PDF 需要用户手动检查或补充文本。
+- 页面里的 API URL 建议填写到 `/v1` 层级，例如 `https://your-gateway.example/v1`。

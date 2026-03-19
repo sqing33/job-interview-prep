@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  experimental: {
+    proxyClientMaxBodySize: "12mb",
+  },
+  serverExternalPackages: ["better-sqlite3", "mammoth", "pdf-parse"],
 };
 
 export default nextConfig;
