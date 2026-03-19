@@ -30,6 +30,7 @@ export interface AnalysisSummary {
 }
 
 export interface AnalysisRecord extends AnalysisSummary {
+  companyText: string;
   jobText: string;
   resumeText: string;
   warnings: string[];
@@ -47,6 +48,7 @@ export interface ParsedDocumentResponse {
 export interface CreateAnalysisRequest {
   model: string;
   questionCount: 30 | 40 | 50;
+  companyText: string;
   jobText: string;
   resumeText: string;
 }
@@ -60,6 +62,7 @@ export interface CreateAnalysisResponse {
 export interface AppSettings {
   apiKey: string;
   apiBaseUrl: string;
+  tavilyApiKey: string;
   defaultModel: string;
   resumeText: string;
   updatedAt: number | null;

@@ -11,14 +11,17 @@ function hasErrorMessage(payload: unknown): payload is { error?: { message?: str
 
 export function InputForm({
   initialModel,
+  initialCompanyText,
   initialJobText,
   initialResumeText,
 }: {
   initialModel: string;
+  initialCompanyText: string;
   initialJobText: string;
   initialResumeText: string;
 }) {
   const [model, setModel] = useState(initialModel);
+  const [companyText, setCompanyText] = useState(initialCompanyText);
   const [jobText, setJobText] = useState(initialJobText);
   const [resumeText, setResumeText] = useState(initialResumeText);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -96,11 +99,12 @@ export function InputForm({
   }, [initialModel, model, resumeText]);
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
+    <div className="flex min-h-full flex-col overflow-y-auto pb-4 lg:h-full lg:min-h-0 lg:pb-0 lg:flex-row lg:overflow-hidden">
       <div
-        className="order-2 flex min-h-[18rem] min-w-0 flex-col border-t border-border lg:order-1 lg:min-h-0 lg:flex-[0_0_70%] lg:border-t-0 lg:border-r"
+        className="order-2 flex min-h-[20rem] min-w-0 flex-col border-t border-border lg:order-1 lg:min-h-0 lg:flex-[0_0_70%] lg:border-t-0 lg:border-r"
       >
         <ChatPanel
+          companyText={companyText}
           jobText={jobText}
           model={model}
           onModelChange={setModel}
@@ -112,6 +116,15 @@ export function InputForm({
       </div>
 
       <div className="order-1 flex min-w-0 shrink-0 flex-col lg:order-2 lg:flex-[0_0_30%]">
+        <div className="min-h-[12rem] border-b border-border lg:min-h-0" style={{ flex: "0.8 1 0" }}>
+          <DocumentPane
+            inputId="company-text"
+            label="企业补充信息"
+            value={companyText}
+            warnings={[]}
+            onValueChange={setCompanyText}
+          />
+        </div>
         <div className="min-h-[17rem] border-b border-border lg:min-h-0" style={{ flex: "1 1 0" }}>
           <DocumentPane
             inputId="job-upload"

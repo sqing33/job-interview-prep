@@ -14,6 +14,7 @@ export default async function InputPage({
   const settings = getAppSettings();
 
   let initialModel = settings.defaultModel;
+  let initialCompanyText = "";
   let initialJobText = "";
   let initialResumeText = settings.resumeText;
 
@@ -22,6 +23,7 @@ export default async function InputPage({
 
     if (analysis) {
       initialModel = analysis.model;
+      initialCompanyText = analysis.companyText;
       initialJobText = analysis.jobText;
       initialResumeText = analysis.resumeText;
     }
@@ -30,6 +32,7 @@ export default async function InputPage({
   return (
     <InputForm
       initialModel={initialModel}
+      initialCompanyText={initialCompanyText}
       initialJobText={initialJobText}
       initialResumeText={initialResumeText}
     />

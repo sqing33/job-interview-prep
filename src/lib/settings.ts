@@ -12,6 +12,7 @@ import type { AppSettings } from "@/lib/types";
 const settingsSchema = z.object({
   apiKey: z.string().default(""),
   apiBaseUrl: z.string().default(""),
+  tavilyApiKey: z.string().default(""),
   defaultModel: z.string().default(DEFAULT_MODEL),
   resumeText: z.string().default(""),
   updatedAt: z.number().nullable().default(null),
@@ -20,6 +21,7 @@ const settingsSchema = z.object({
 const saveSettingsSchema = z.object({
   apiKey: z.string().trim().optional(),
   apiBaseUrl: z.string().trim().optional(),
+  tavilyApiKey: z.string().trim().optional(),
   defaultModel: z.string().trim().min(1, "默认模型不能为空。").optional(),
   resumeText: z.string().optional(),
 });
@@ -36,6 +38,7 @@ export function getDefaultAppSettings(): AppSettings {
   return {
     apiKey: "",
     apiBaseUrl: "",
+    tavilyApiKey: "",
     defaultModel: DEFAULT_MODEL,
     resumeText: "",
     updatedAt: null,
@@ -87,6 +90,7 @@ export function saveAppSettings(input: unknown): AppSettings {
     apiKey: parsed.apiKey ?? current.apiKey,
     apiBaseUrl:
       parsed.apiBaseUrl === undefined ? current.apiBaseUrl : normalizeApiBaseUrl(parsed.apiBaseUrl),
+    tavilyApiKey: parsed.tavilyApiKey ?? current.tavilyApiKey,
     defaultModel: parsed.defaultModel ?? current.defaultModel,
     resumeText: parsed.resumeText ?? current.resumeText,
     updatedAt: Date.now(),

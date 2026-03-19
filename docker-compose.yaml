@@ -1,6 +1,6 @@
 services:
   job-interview-dossier:
-    image: job-interview-dossier:latest
+    image: ghcr.nju.edu.cn/sqing33/job-interview-prep
     container_name: job-interview-dossier
     restart: unless-stopped
     ports:

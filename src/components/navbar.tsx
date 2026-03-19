@@ -135,6 +135,23 @@ export function Navbar({ initialSettings }: { initialSettings: AppSettings }) {
               </div>
 
               <div className="space-y-3">
+                <Label htmlFor="navbar-tavily-api-key">Tavily API Key</Label>
+                <Input
+                  id="navbar-tavily-api-key"
+                  autoComplete="off"
+                  placeholder="tvly-..."
+                  type="password"
+                  value={settingsDraft.tavilyApiKey}
+                  onChange={(event) =>
+                    setSettingsDraft((prev) => ({ ...prev, tavilyApiKey: event.target.value }))
+                  }
+                />
+                <p className="text-xs leading-6 text-foreground-soft">
+                  可选。配置后会在分析前联网搜索企业资料，增强岗位匹配题质量。
+                </p>
+              </div>
+
+              <div className="space-y-3">
                 <Label htmlFor="navbar-default-model">默认模型</Label>
                 <Input
                   id="navbar-default-model"

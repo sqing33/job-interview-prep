@@ -60,7 +60,16 @@ export default async function AnalysisDetailPage({
           <QuestionBank analysis={analysis} />
         </section>
 
-        <section className="grid gap-6 xl:grid-cols-2">
+        <section className={`grid gap-6 ${analysis.companyText ? "xl:grid-cols-3" : "xl:grid-cols-2"}`}>
+          {analysis.companyText ? (
+            <article className="paper-panel rounded-[1.5rem] p-4 sm:rounded-[1.7rem] sm:p-5 lg:rounded-[1.8rem] lg:p-6">
+              <h2 className="text-lg font-semibold text-foreground sm:text-xl">企业补充信息</h2>
+              <pre className="analysis-text mt-4 rounded-[1.2rem] border border-border bg-white/62 p-4 text-[15px] leading-7 text-foreground-soft sm:rounded-[1.35rem] sm:p-5 sm:text-base sm:leading-8">
+                {analysis.companyText}
+              </pre>
+            </article>
+          ) : null}
+
           <article className="paper-panel rounded-[1.5rem] p-4 sm:rounded-[1.7rem] sm:p-5 lg:rounded-[1.8rem] lg:p-6">
             <h2 className="text-lg font-semibold text-foreground sm:text-xl">岗位 / 企业信息</h2>
             <pre className="analysis-text mt-4 rounded-[1.2rem] border border-border bg-white/62 p-4 text-[15px] leading-7 text-foreground-soft sm:rounded-[1.35rem] sm:p-5 sm:text-base sm:leading-8">

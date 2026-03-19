@@ -18,6 +18,7 @@ const analyses = sqliteTable("analyses", {
   title: text("title").notNull(),
   model: text("model").notNull(),
   questionCount: integer("question_count").notNull(),
+  companyText: text("company_text").notNull(),
   jobText: text("job_text").notNull(),
   resumeText: text("resume_text").notNull(),
   resultJson: text("result_json").notNull(),
@@ -48,6 +49,7 @@ function getDb() {
       title TEXT NOT NULL,
       model TEXT NOT NULL,
       question_count INTEGER NOT NULL,
+      company_text TEXT NOT NULL DEFAULT '',
       job_text TEXT NOT NULL,
       resume_text TEXT NOT NULL,
       result_json TEXT NOT NULL,
@@ -57,6 +59,11 @@ function getDb() {
     );
     CREATE INDEX IF NOT EXISTS analyses_created_at_idx ON analyses(created_at DESC);
   `);
+
+  const columns = sqlite.prepare("PRAGMA table_info(analyses)").all() as Array<{ name: string }>;
+  if (!columns.some((column) => column.name === "company_text")) {
+    sqlite.exec("ALTER TABLE analyses ADD COLUMN company_text TEXT NOT NULL DEFAULT '';");
+  }
 
   database = drizzle(sqlite, { schema: { analyses } });
   return database;
@@ -68,6 +75,7 @@ function toAnalysisRecord(row: typeof analyses.$inferSelect): AnalysisRecord {
     title: row.title,
     model: row.model,
     questionCount: row.questionCount,
+    companyText: row.companyText,
     jobText: row.jobText,
     resumeText: row.resumeText,
     warnings: JSON.parse(row.warningsJson) as string[],
@@ -109,6 +117,7 @@ export function getAnalysisById(id: string) {
 export function saveAnalysisRecord(input: {
   model: string;
   questionCount: number;
+  companyText: string;
   jobText: string;
   resumeText: string;
   warnings: string[];
@@ -120,6 +129,7 @@ export function saveAnalysisRecord(input: {
     title: buildTitle(input.result, input.questionCount, input.jobText),
     model: input.model,
     questionCount: input.questionCount,
+    companyText: input.companyText,
     jobText: input.jobText,
     resumeText: input.resumeText,
     warnings: input.warnings,
@@ -135,6 +145,7 @@ export function saveAnalysisRecord(input: {
       title: record.title,
       model: record.model,
       questionCount: record.questionCount,
+      companyText: record.companyText,
       jobText: record.jobText,
       resumeText: record.resumeText,
       resultJson: JSON.stringify(record.result),

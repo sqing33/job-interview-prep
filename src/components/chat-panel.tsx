@@ -7,7 +7,7 @@ import { Button, Input } from "@/components/ui";
 
 interface ChatMessage {
   id: string;
-  type: "job_sent" | "file_sent" | "thinking" | "status" | "done" | "error";
+  type: "job_sent" | "file_sent" | "research" | "thinking" | "status" | "done" | "error";
   content: string;
   fileName?: string;
   analysisId?: string;
@@ -19,6 +19,7 @@ function nextId() {
 }
 
 export function ChatPanel({
+  companyText,
   jobText,
   model,
   onModelChange,
@@ -27,6 +28,7 @@ export function ChatPanel({
   onGenerate,
   uploadedFileName,
 }: {
+  companyText: string;
   jobText: string;
   model: string;
   onModelChange: (value: string) => void;
@@ -36,14 +38,31 @@ export function ChatPanel({
   uploadedFileName: string | null;
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [localGenerating, setLocalGenerating] = useState(false);
+  const shouldAutoScrollRef = useRef(true);
 
   const generating = isGenerating || localGenerating;
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (!shouldAutoScrollRef.current) {
+      return;
+    }
+
+    messagesEndRef.current?.scrollIntoView({ behavior: messages.length > 1 ? "smooth" : "auto" });
   }, [messages]);
+
+  function handleMessagesScroll() {
+    const container = messagesContainerRef.current;
+
+    if (!container) {
+      return;
+    }
+
+    const distanceToBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+    shouldAutoScrollRef.current = distanceToBottom < 80;
+  }
 
   async function handleGenerate() {
     if (!jobText.trim() || !resumeText.trim() || generating) return;
@@ -64,7 +83,7 @@ export function ChatPanel({
       const response = await fetch("/api/analyses/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ model, questionCount: 50, jobText, resumeText }),
+        body: JSON.stringify({ model, questionCount: 50, companyText, jobText, resumeText }),
       });
 
       if (!response.ok || !response.body) {
@@ -94,6 +113,8 @@ export function ChatPanel({
 
             if (currentEvent === "status") {
               setMessages((prev) => [...prev, { id: nextId(), type: "status", content: data.message }]);
+            } else if (currentEvent === "research") {
+              setMessages((prev) => [...prev, { id: nextId(), type: "research", content: data.content }]);
             } else if (currentEvent === "text") {
               setMessages((prev) => {
                 const last = prev[prev.length - 1];
@@ -135,8 +156,12 @@ export function ChatPanel({
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <div className="min-h-[10rem] flex-1 overflow-y-auto">
+    <div className="flex min-h-[24rem] flex-col lg:h-full lg:min-h-0">
+      <div
+        ref={messagesContainerRef}
+        className="min-h-[10rem] max-h-[55vh] overflow-y-auto lg:flex-1 lg:max-h-none"
+        onScroll={handleMessagesScroll}
+      >
         {!messages.length ? (
           <div className="flex h-full items-center justify-center px-6 text-center text-sm leading-6 text-foreground-soft">
             先输入招聘信息和简历，再开始生成面试分析。
@@ -172,6 +197,19 @@ export function ChatPanel({
                 return (
                   <div key={msg.id} className="flex justify-start">
                     <div className="max-w-[96%] rounded-2xl rounded-bl-md border border-border bg-white/80 px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap text-foreground sm:max-w-[90%]">
+                      {msg.content}
+                    </div>
+                  </div>
+                );
+              }
+
+              if (msg.type === "research") {
+                return (
+                  <div key={msg.id} className="flex justify-start">
+                    <div className="max-w-[96%] rounded-2xl border border-teal/20 bg-teal/8 px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap text-foreground sm:max-w-[90%]">
+                      <p className="mb-2 text-xs font-semibold tracking-[0.12em] text-teal uppercase">
+                        企业搜索结果
+                      </p>
                       {msg.content}
                     </div>
                   </div>
@@ -221,7 +259,7 @@ export function ChatPanel({
         )}
       </div>
 
-      <div className="shrink-0 border-t border-border bg-surface-strong/80 px-4 py-3 backdrop-blur-xl sm:px-5">
+      <div className="sticky bottom-0 z-10 mt-auto shrink-0 border-t border-border bg-surface-strong/95 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-xl sm:px-5 sm:pb-3 lg:static">
         <div className="flex items-center gap-2.5 sm:gap-3">
           <Input
             placeholder="输入模型，例如 gpt-5.4"

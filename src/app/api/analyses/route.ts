@@ -3,6 +3,7 @@ import { z } from "zod";
 import { listAnalysisSummaries, saveAnalysisRecord } from "@/lib/db";
 import { AppError, errorToResponse } from "@/lib/errors";
 import { analysisRequestSchema, generateInterviewAnalysis } from "@/lib/interview-analysis";
+import { researchCompanyBackground } from "@/lib/company-research";
 import { getAppSettings, normalizeApiBaseUrl } from "@/lib/settings";
 
 export const runtime = "nodejs";
@@ -39,15 +40,29 @@ export async function POST(request: Request) {
     }
 
     const input = analysisRequestSchema.parse(payload);
+    let companyResearch = "";
+
+    try {
+      companyResearch = await researchCompanyBackground({
+        tavilyApiKey: persistedSettings.tavilyApiKey,
+        companyText: input.companyText,
+        jobText: input.jobText,
+      });
+    } catch (error) {
+      console.warn("Company research lookup failed", error);
+    }
+
     const generated = await generateInterviewAnalysis({
       apiKey,
       ...(baseUrl ? { baseUrl } : {}),
+      ...(companyResearch ? { companyResearch } : {}),
       ...input,
     });
 
     const analysis = saveAnalysisRecord({
       model: input.model,
       questionCount: input.questionCount,
+      companyText: input.companyText,
       jobText: input.jobText,
       resumeText: input.resumeText,
       warnings: generated.warnings,

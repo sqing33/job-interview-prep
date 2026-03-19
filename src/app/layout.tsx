@@ -37,9 +37,9 @@ export default function RootLayout({
       lang="zh-CN"
       className={`${spaceGrotesk.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >
-      <body className="h-screen flex flex-col overflow-hidden">
+      <body className="flex min-h-dvh flex-col overflow-y-auto lg:h-screen lg:overflow-hidden">
         <Navbar initialSettings={settings} />
-        <main className="w-full flex-1 flex flex-col min-h-0">
+        <main className="w-full flex-1 flex flex-col min-h-0 overflow-y-visible lg:overflow-hidden">
           {children}
         </main>
       </body>

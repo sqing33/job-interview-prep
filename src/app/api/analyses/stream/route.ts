@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { saveAnalysisRecord } from "@/lib/db";
 import { toPublicError } from "@/lib/errors";
+import { researchCompanyBackground } from "@/lib/company-research";
 import {
   analysisRequestSchema,
   generateInterviewAnalysisStream,
@@ -52,6 +53,17 @@ export async function POST(request: Request) {
     }
 
     const encoder = new TextEncoder();
+    let companyResearch = "";
+
+    try {
+      companyResearch = await researchCompanyBackground({
+        tavilyApiKey: persistedSettings.tavilyApiKey,
+        companyText: input.companyText,
+        jobText: input.jobText,
+      });
+    } catch (error) {
+      console.warn("Company research lookup failed", error);
+    }
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -60,9 +72,14 @@ export async function POST(request: Request) {
         }
 
         try {
+          if (companyResearch) {
+            sendEvent("research", { content: companyResearch });
+          }
+
           for await (const event of generateInterviewAnalysisStream({
             apiKey,
             ...(baseUrl ? { baseUrl } : {}),
+            ...(companyResearch ? { companyResearch } : {}),
             ...input,
           })) {
             switch (event.type) {
@@ -76,6 +93,7 @@ export async function POST(request: Request) {
                 const analysis = saveAnalysisRecord({
                   model: input.model,
                   questionCount: input.questionCount,
+                  companyText: input.companyText,
                   jobText: input.jobText,
                   resumeText: input.resumeText,
                   warnings: event.warnings!,

@@ -1,6 +1,6 @@
 import type { CategoryKey } from "@/lib/types";
 
-export const APP_NAME = "Job Interview Dossier";
+export const APP_NAME = "JID";
 export const DEFAULT_MODEL = "gpt-4.1-mini";
 export const MODEL_PRESETS = ["gpt-4.1-mini", "gpt-4.1", "gpt-4o-mini", "gpt-4o", "o4-mini"];
 export const QUESTION_COUNT_OPTIONS = [30, 40, 50] as const;
@@ -31,10 +31,10 @@ export const QUESTION_QUOTAS: Record<number, Record<CategoryKey, number>> = {
     fit: 8,
   },
   50: {
-    technical: 18,
+    technical: 13,
     project: 12,
     behavioral: 10,
-    fit: 10,
+    fit: 15,
   },
 };
 

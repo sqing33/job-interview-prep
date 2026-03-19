@@ -32,6 +32,7 @@ pnpm build
 ## 说明
 
 - 首次安装后如果 `better-sqlite3` 缺少原生绑定，可在其包目录重新执行一次安装脚本。
+- Docker 镜像构建需要保留 `better-sqlite3` 的原生编译产物；如果升级依赖后容器启动时报 `Could not locate the bindings file`，优先重建镜像并确认构建阶段执行了 `pnpm rebuild better-sqlite3`。
 - PDF 仅保证支持“可提取文本”的文档；扫描版 PDF 需要用户手动检查或补充文本。
 - 页面里的 API URL 建议填写到 `/v1` 层级，例如 `https://your-gateway.example/v1`。
 - 数据库和前端保存的设置默认都写入项目下的 `data/` 目录。
