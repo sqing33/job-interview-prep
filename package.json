@@ -1,11 +1,11 @@
 {
-  "name": "job-interview-prep",
+  "name": "job-interview-dossier",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3857",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3857",
     "lint": "eslint",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest",

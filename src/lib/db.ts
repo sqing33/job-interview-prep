@@ -27,10 +27,6 @@ const analyses = sqliteTable("analyses", {
 });
 
 function getDatabasePath() {
-  if (process.env.APP_DATABASE_PATH) {
-    return path.resolve(/* turbopackIgnore: true */ process.cwd(), process.env.APP_DATABASE_PATH);
-  }
-
   return path.join(/* turbopackIgnore: true */ process.cwd(), "data", DATABASE_FILE_NAME);
 }
 

@@ -5,6 +5,6 @@ export default defineConfig({
   schema: "./src/lib/db.ts",
   out: "./drizzle",
   dbCredentials: {
-    url: process.env.APP_DATABASE_PATH || "./data/interview-prep.sqlite",
+    url: "./data/interview-prep.sqlite",
   },
 });
